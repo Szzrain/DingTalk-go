@@ -1,4 +1,4 @@
-module DingTalk-go
+module github.com/Szzrain/DingTalk-go
 
 go 1.18
 
