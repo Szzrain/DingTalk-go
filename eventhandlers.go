@@ -17,7 +17,7 @@ func (s *Session) addEventHandler(eventHandler EventHandler) func() {
 	s.handlers[eventHandler.Type()] = append(s.handlers[eventHandler.Type()], ehi)
 
 	return func() {
-		s.removeEventHandlerInstance("event", ehi)
+		s.removeEventHandlerInstance(eventHandler.Type(), ehi)
 	}
 }
 
