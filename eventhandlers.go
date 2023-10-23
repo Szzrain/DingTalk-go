@@ -53,7 +53,7 @@ func (s *Session) removeEventHandlerInstance(t string, ehi *eventHandlerInstance
 	}
 }
 
-func (s *Session) onSteamEventReceived(c context.Context, data *chatbot.BotCallbackDataModel) ([]byte, error) {
+func (s *Session) onSteamEventReceived(_ context.Context, data *chatbot.BotCallbackDataModel) ([]byte, error) {
 	s.handle(botCallBackHandlerEventType, data)
 	return nil, nil
 }

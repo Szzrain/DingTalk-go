@@ -81,12 +81,12 @@ func (s *Session) getAccessToken() (token string, err error) {
 	// 检查时间差是否超过1小时
 	if diff.Hours() > 1 {
 		// 超过1小时，重新获取token
-		resp, err := s.request(EndPointAccessToken, http.MethodPost, &accessTokenRequestBody{
+		resp, errs := s.request(EndPointAccessToken, http.MethodPost, &accessTokenRequestBody{
 			ClientID: s.ClientID,
 			Token:    s.Token,
 		})
-		if err != nil {
-			return "", err
+		if errs != nil {
+			return "", errs
 		}
 		var accessTokenResponse struct {
 			AccessToken string `json:"accessToken"`
@@ -94,7 +94,7 @@ func (s *Session) getAccessToken() (token string, err error) {
 		}
 		err = Unmarshal(resp, &accessTokenResponse)
 		if err != nil {
-			return "", err
+			return
 		}
 		s.AccessToken = accessTokenResponse.AccessToken
 		s.AccessTokenTimeStamps = time.Now().Unix()
@@ -146,6 +146,9 @@ func (s *Session) request(url string, method string, data interface{}, options .
 		}
 	}
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	if err != nil {
+		return
+	}
 	req.Header.Set("Content-Type", "application/json")
 	cfg := newRequestConfig(s, req)
 	for _, opt := range options {
