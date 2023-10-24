@@ -1,7 +1,6 @@
 package DingTalk_go
 
 import (
-	"context"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/chatbot"
 )
 
@@ -23,6 +22,10 @@ func (s *Session) addEventHandler(eventHandler EventHandler) func() {
 
 func (s *Session) AddEventHandler(handler interface{}) func() {
 	eh := handlerForInterface(handler)
+	if eh == nil {
+		//fmt.Println("handlerForInterface(handler) is nil")
+		return func() {}
+	}
 	return s.addEventHandler(eh)
 }
 
@@ -30,6 +33,8 @@ func handlerForInterface(handler interface{}) EventHandler {
 	switch v := handler.(type) {
 	case func(s *Session, data *chatbot.BotCallbackDataModel):
 		return botCallbackModelHandler(v)
+	case func(s *Session, data *GroupJoinedEvent):
+		return groupJoinedEventHandler(v)
 	}
 	return nil
 }
@@ -51,11 +56,6 @@ func (s *Session) removeEventHandlerInstance(t string, ehi *eventHandlerInstance
 			s.onceHandlers[t] = append(onceHandlers[:i], onceHandlers[i+1:]...)
 		}
 	}
-}
-
-func (s *Session) onSteamEventReceived(_ context.Context, data *chatbot.BotCallbackDataModel) ([]byte, error) {
-	s.handle(botCallBackHandlerEventType, data)
-	return nil, nil
 }
 
 func (s *Session) handle(t string, i interface{}) {

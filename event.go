@@ -13,6 +13,7 @@ type eventHandlerInstance struct {
 }
 
 const botCallBackHandlerEventType = "BOT_CALLBACK"
+const botJoinGroupEventType = "im_cool_app_install"
 
 type botCallbackModelHandler func(s *Session, data *chatbot.BotCallbackDataModel)
 
@@ -23,6 +24,18 @@ func (eh botCallbackModelHandler) Type() string {
 
 func (eh botCallbackModelHandler) Handle(s *Session, i interface{}) {
 	if t, ok := i.(*chatbot.BotCallbackDataModel); ok {
+		eh(s, t)
+	}
+}
+
+type groupJoinedEventHandler func(s *Session, data *GroupJoinedEvent)
+
+func (eh groupJoinedEventHandler) Type() string {
+	return botJoinGroupEventType
+}
+
+func (eh groupJoinedEventHandler) Handle(s *Session, i interface{}) {
+	if t, ok := i.(*GroupJoinedEvent); ok {
 		eh(s, t)
 	}
 }

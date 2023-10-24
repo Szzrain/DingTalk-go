@@ -3,6 +3,7 @@ package DingTalk_go
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -149,12 +150,12 @@ func (s *Session) request(url string, method string, data interface{}, options .
 	if err != nil {
 		return
 	}
-	req.Header.Set("Content-Type", "application/json")
 	cfg := newRequestConfig(s, req)
 	for _, opt := range options {
 		opt(cfg)
 	}
 	req = cfg.Request
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := cfg.Client.Do(req)
 	if err != nil {
 		return
@@ -162,6 +163,13 @@ func (s *Session) request(url string, method string, data interface{}, options .
 	defer func() {
 		_ = resp.Body.Close()
 	}()
+	if resp.StatusCode != 200 {
+		responseJsonBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf(string(responseJsonBody))
+	}
 	response, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return
