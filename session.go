@@ -12,7 +12,7 @@ import (
 )
 
 func New(clientID string, token string) *Session {
-	logger.SetLogger(logger.NewStdTestLogger())
+	//logger.SetLogger(logger.NewStdTestLogger())
 	s := &Session{
 		ClientID: clientID,
 		Token:    token,
@@ -56,6 +56,7 @@ func (s *Session) OnEventReceived(ctx context.Context, df *payload.DataFrame) (f
 		var joinEvent GroupJoinedEvent
 		err = Unmarshal([]byte(df.Data), &joinEvent)
 		if err != nil {
+			//logger.GetLogger().Errorf("unmarshal event failed, err=[%s]", err.Error())
 			return nil, err
 		}
 		s.handle(botJoinGroupEventType, &joinEvent)

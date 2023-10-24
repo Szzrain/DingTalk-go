@@ -23,7 +23,7 @@ func (s *Session) addEventHandler(eventHandler EventHandler) func() {
 func (s *Session) AddEventHandler(handler interface{}) func() {
 	eh := handlerForInterface(handler)
 	if eh == nil {
-		//fmt.Println("handlerForInterface(handler) is nil")
+		//logger.GetLogger().Infof("handlerForInterface(handler) is nil")
 		return func() {}
 	}
 	return s.addEventHandler(eh)

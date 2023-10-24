@@ -49,7 +49,7 @@ func (s *Session) Open() (err error) {
 
 type GroupJoinedEvent struct {
 	EventId                string `json:"eventId"`
-	OperateTime            int64  `json:"operateTime"`
+	OperateTime            string `json:"operateTime"`
 	CoolAppCode            string `json:"coolAppCode"`
 	OpenConversationId     string `json:"openConversationId"`
 	RobotCode              string `json:"robotCode"`
