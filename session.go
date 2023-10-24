@@ -5,7 +5,6 @@ import (
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/chatbot"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/client"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/event"
-	"github.com/open-dingtalk/dingtalk-stream-sdk-go/logger"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/payload"
 	"net/http"
 	"time"
@@ -30,13 +29,13 @@ func New(clientID string, token string) *Session {
 }
 
 func (s *Session) onSteamEventReceived(_ context.Context, data *chatbot.BotCallbackDataModel) ([]byte, error) {
-	logger.GetLogger().Infof("received event, conversationId=[%s] senderId=[%s] senderNick=[%s] msgType=[%s] text=[%s] webHook=[%s]",
-		data.ConversationId,
-		data.SenderId,
-		data.SenderNick,
-		data.Msgtype,
-		data.Text.Content,
-		data.SessionWebhook)
+	//logger.GetLogger().Infof("received event, conversationId=[%s] senderId=[%s] senderNick=[%s] msgType=[%s] text=[%s] webHook=[%s]",
+	//	data.ConversationId,
+	//	data.SenderId,
+	//	data.SenderNick,
+	//	data.Msgtype,
+	//	data.Text.Content,
+	//	data.SessionWebhook)
 	s.WebHookCallbackMap[data.ConversationId] = data.SessionWebhook
 	s.handle(botCallBackHandlerEventType, data)
 	return nil, nil
@@ -45,13 +44,13 @@ func (s *Session) onSteamEventReceived(_ context.Context, data *chatbot.BotCallb
 func (s *Session) OnEventReceived(_ context.Context, df *payload.DataFrame) (frameResp *payload.DataFrameResponse, err error) {
 	eventHeader := event.NewEventHeaderFromDataFrame(df)
 
-	logger.GetLogger().Infof("received event, eventId=[%s] eventBornTime=[%d] eventCorpId=[%s] eventType=[%s] eventUnifiedAppId=[%s] data=[%s]",
-		eventHeader.EventId,
-		eventHeader.EventBornTime,
-		eventHeader.EventCorpId,
-		eventHeader.EventType,
-		eventHeader.EventUnifiedAppId,
-		df.Data)
+	//logger.GetLogger().Infof("received event, eventId=[%s] eventBornTime=[%d] eventCorpId=[%s] eventType=[%s] eventUnifiedAppId=[%s] data=[%s]",
+	//	eventHeader.EventId,
+	//	eventHeader.EventBornTime,
+	//	eventHeader.EventCorpId,
+	//	eventHeader.EventType,
+	//	eventHeader.EventUnifiedAppId,
+	//	df.Data)
 	switch eventHeader.EventType {
 	case "im_cool_app_install":
 		var joinEvent GroupJoinedEvent

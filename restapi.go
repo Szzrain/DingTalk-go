@@ -108,6 +108,42 @@ func (s *Session) getAccessToken() (token string, err error) {
 	return
 }
 
+func (s *Session) MessagePrivateSend(staffId string, robotCode string, msg Message) (processQueryKey string, err error) {
+	accessToken, err := s.getAccessToken()
+	if err != nil {
+		return
+	}
+	var body struct {
+		MsgParam  string   `json:"msgParam"`
+		MsgKey    string   `json:"msgKey"`
+		UserIds   []string `json:"userIds"`
+		RobotCode string   `json:"robotCode,omitempty"`
+		Token     string   `json:"token,omitempty"`
+	}
+	msgParam, err := Marshal(msg)
+	if err != nil {
+		logger.GetLogger().Errorf("MessagePrivateSend Marshal Error: %s", err)
+		return
+	}
+	body.MsgParam = string(msgParam)
+	body.MsgKey = string(msg.Type())
+	body.UserIds = []string{staffId}
+	body.RobotCode = robotCode
+	resp, err := s.request(EndPointBatchSend, http.MethodPost, body, WithAccessToken(accessToken))
+	if err != nil {
+		return
+	}
+	var response struct {
+		ProcessQueryKey string `json:"processQueryKey"`
+	}
+	err = Unmarshal(resp, &response)
+	if err != nil {
+		return
+	}
+	processQueryKey = response.ProcessQueryKey
+	return
+}
+
 func (s *Session) MessageGroupSend(conversationID string, robotCode string, coolAppCode string, msg Message) (processQueryKey string, err error) {
 	accessToken, err := s.getAccessToken()
 	if err != nil {
@@ -130,7 +166,9 @@ func (s *Session) MessageGroupSend(conversationID string, robotCode string, cool
 	body.MsgKey = string(msg.Type())
 	body.OpenConversationID = conversationID
 	body.RobotCode = robotCode
-	body.CoolAppCode = coolAppCode
+	if coolAppCode != "" {
+		body.CoolAppCode = coolAppCode
+	}
 	resp, err := s.request(EndPointGroupSend, http.MethodPost, body, WithAccessToken(accessToken))
 	if err != nil {
 		return
