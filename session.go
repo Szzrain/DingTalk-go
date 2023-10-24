@@ -14,9 +14,10 @@ import (
 func New(clientID string, token string) *Session {
 	//logger.SetLogger(logger.NewStdTestLogger())
 	s := &Session{
-		ClientID: clientID,
-		Token:    token,
-		Client:   &http.Client{Timeout: (20 * time.Second)},
+		ClientID:           clientID,
+		Token:              token,
+		Client:             &http.Client{Timeout: (20 * time.Second)},
+		WebHookCallbackMap: make(map[string]string),
 	}
 	cli := client.NewStreamClient(
 		client.WithAppCredential(client.NewAppCredentialConfig(clientID, token)),
@@ -41,7 +42,7 @@ func (s *Session) onSteamEventReceived(_ context.Context, data *chatbot.BotCallb
 	return nil, nil
 }
 
-func (s *Session) OnEventReceived(ctx context.Context, df *payload.DataFrame) (frameResp *payload.DataFrameResponse, err error) {
+func (s *Session) OnEventReceived(_ context.Context, df *payload.DataFrame) (frameResp *payload.DataFrameResponse, err error) {
 	eventHeader := event.NewEventHeaderFromDataFrame(df)
 
 	logger.GetLogger().Infof("received event, eventId=[%s] eventBornTime=[%d] eventCorpId=[%s] eventType=[%s] eventUnifiedAppId=[%s] data=[%s]",
@@ -60,7 +61,6 @@ func (s *Session) OnEventReceived(ctx context.Context, df *payload.DataFrame) (f
 			return nil, err
 		}
 		s.handle(botJoinGroupEventType, &joinEvent)
-		break
 	}
 	frameResp = payload.NewSuccessDataFrameResponse()
 	if err = frameResp.SetJson(event.NewEventProcessResultSuccess()); err != nil {
