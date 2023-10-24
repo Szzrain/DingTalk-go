@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/open-dingtalk/dingtalk-stream-sdk-go/logger"
 	"io"
 	"net/http"
 	"time"
@@ -64,8 +65,8 @@ func WithAccessToken(accessToken string) RequestOption {
 }
 
 type accessTokenRequestBody struct {
-	ClientID string `json:"client_id"`
-	Token    string `json:"token"`
+	ClientID string `json:"appKey"`
+	Token    string `json:"appSecret"`
 }
 
 func (s *Session) getAccessToken() (token string, err error) {
@@ -107,22 +108,29 @@ func (s *Session) getAccessToken() (token string, err error) {
 	return
 }
 
-func (s *Session) MessageGroupSend(conversationID string, msg Message) (processQueryKey string, err error) {
+func (s *Session) MessageGroupSend(conversationID string, robotCode string, coolAppCode string, msg Message) (processQueryKey string, err error) {
 	accessToken, err := s.getAccessToken()
 	if err != nil {
 		return
 	}
 	var body struct {
-		MsgParam           Message `json:"msgParam"`
-		MsgKey             string  `json:"msgKey"`
-		OpenConversationID string  `json:"openConversationId"`
-		RobotCode          string  `json:"robotCode,omitempty"`
-		Token              string  `json:"token,omitempty"`
-		CoolAppCode        string  `json:"coolAppCode,omitempty"`
+		MsgParam           string `json:"msgParam"`
+		MsgKey             string `json:"msgKey"`
+		OpenConversationID string `json:"openConversationId"`
+		RobotCode          string `json:"robotCode,omitempty"`
+		Token              string `json:"token,omitempty"`
+		CoolAppCode        string `json:"coolAppCode,omitempty"`
 	}
-	body.MsgParam = msg
+	msgParam, err := Marshal(msg)
+	if err != nil {
+		logger.GetLogger().Errorf("MessageGroupSend Marshal Error: %s", err)
+		return
+	}
+	body.MsgParam = string(msgParam)
 	body.MsgKey = string(msg.Type())
 	body.OpenConversationID = conversationID
+	body.RobotCode = robotCode
+	body.CoolAppCode = coolAppCode
 	resp, err := s.request(EndPointGroupSend, http.MethodPost, body, WithAccessToken(accessToken))
 	if err != nil {
 		return
